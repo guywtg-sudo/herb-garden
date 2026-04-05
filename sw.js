@@ -1,5 +1,11 @@
-const CACHE = 'herb-garden-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'herb-garden-v2';
+const ASSETS = [
+  '/herb-garden/',
+  '/herb-garden/index.html',
+  '/herb-garden/manifest.json',
+  '/herb-garden/icon-192.png',
+  '/herb-garden/icon-512.png'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -15,6 +21,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/herb-garden/index.html')))
   );
 });

@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="גינת עשבים">
 <meta name="description" content="מדריך גידול עשבי תיבול — מושב עמינדב">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/herb-garden/manifest.json">
+<link rel="apple-touch-icon" href="/herb-garden/icon-192.png">
 <title>גינת עשבי התיבול שלי</title>
 <style>
   :root {
@@ -416,7 +416,7 @@ document.getElementById('alert-home').innerHTML=getAlert();
 
 // Service Worker
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  navigator.serviceWorker.register('/herb-garden/sw.js').catch(()=>{});
 }
 
 // Install prompt
@@ -455,7 +455,7 @@ function scheduleDaily(hhmm){
 }
 function fireNotification(){
   if(Notification.permission!=='granted') return;
-  try{new Notification('🌿 גינת עשבי התיבול — עמינדב',{body:buildNotifBody()||'בדוק את הגינה שלך היום!',tag:'herb-daily',renotify:true,dir:'rtl',icon:'/icon-192.png',badge:'/icon-192.png'});}catch(e){}
+  try{new Notification('🌿 גינת עשבי התיבול — עמינדב',{body:buildNotifBody()||'בדוק את הגינה שלך היום!',tag:'herb-daily',renotify:true,dir:'rtl',icon:'/herb-garden/icon-192.png',badge:'/herb-garden/icon-192.png'});}catch(e){}
 }
 function setNotifStatus(enabled,time){
   const el=document.getElementById('notif-status'),tr=document.getElementById('time-row');
@@ -481,7 +481,7 @@ async function toggleNotifications(enabled){
   if(perm==='default'){setNotifStatus(true,time);perm=await Notification.requestPermission();}
   if(perm==='granted'){
     scheduleDaily(time);
-    setTimeout(()=>{try{new Notification('🌿 גינת עשבי התיבול — עמינדב',{body:'התזכורת הופעלה! תקבל עדכון כל יום בשעה '+time,tag:'herb-test',dir:'rtl',icon:'/icon-192.png'});}catch(e){}},2000);
+    setTimeout(()=>{try{new Notification('🌿 גינת עשבי התיבול — עמינדב',{body:'התזכורת הופעלה! תקבל עדכון כל יום בשעה '+time,tag:'herb-test',dir:'rtl',icon:'/herb-garden/icon-192.png'});}catch(e){}},2000);
   }
   setNotifStatus(true,time);
 }
