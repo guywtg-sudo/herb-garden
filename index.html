@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3B6D11">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="גינת עשבים">
+<meta name="description" content="מדריך גידול עשבי תיבול — מושב עמינדב">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>גינת עשבי התיבול שלי</title>
+<style>
+  :root {
+    --green-dark: #27500A; --green-mid: #3B6D11; --green-bright: #639922;
+    --green-light: #97C459; --green-pale: #EAF3DE;
+    --blue-pale: #E6F1FB; --blue-dark: #0C447C;
+    --amber-pale: #FAEEDA; --amber-dark: #633806;
+    --red-pale: #FCEBEB; --red-dark: #791F1F;
+    --text-primary: #1a1a1a; --text-secondary: #555; --text-tertiary: #888;
+    --border: rgba(0,0,0,0.1); --border-mid: rgba(0,0,0,0.18);
+    --bg: #f7f6f2; --card: #fff; --surface: #f0efe9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --text-primary: #f0f0f0; --text-secondary: #bbb; --text-tertiary: #888;
+      --border: rgba(255,255,255,0.1); --border-mid: rgba(255,255,255,0.18);
+      --bg: #1a1c18; --card: #232620; --surface: #2a2d26;
+      --green-pale: #1e2e12; --green-dark: #a8d878;
+      --blue-pale: #0d1e30; --blue-dark: #7ab8f0;
+      --amber-pale: #2a1f08; --amber-dark: #f0c070;
+      --red-pale: #2a1010; --red-dark: #f09090;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { height: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 16px; height: 100%; overflow: hidden; }
+  .app { display: flex; flex-direction: column; height: 100%; height: 100dvh; max-width: 500px; margin: 0 auto; position: fixed; inset: 0; margin: 0 auto; }
+  .header { background: var(--green-mid); color: white; padding: 14px 16px 10px; padding-top: calc(14px + env(safe-area-inset-top)); flex-shrink: 0; }
+  .header h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+  .header-sub { font-size: 12px; opacity: 0.8; }
+  .nav { display: flex; background: var(--card); border-top: 0.5px solid var(--border); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-btn { flex: 1; padding: 10px 4px 8px; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--text-tertiary); font-family: inherit; }
+  .nav-btn.active { color: var(--green-mid); }
+  .nav-icon { font-size: 22px; line-height: 1; }
+  .screens { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
+  .screen { display: none; padding: 12px; padding-bottom: 20px; }
+  .screen.active { display: block; }
+  .card { background: var(--card); border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 0.5px solid var(--border); }
+  .card-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
+  .herb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+  .herb-btn { background: var(--card); border: 0.5px solid var(--border); border-radius: 14px; padding: 14px 8px; cursor: pointer; text-align: center; font-family: inherit; }
+  .herb-btn:active { opacity: 0.7; }
+  .herb-emoji { font-size: 38px; display: block; margin-bottom: 8px; }
+  .herb-name { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .herb-latin { font-size: 11px; color: var(--text-tertiary); font-style: italic; margin-bottom: 8px; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; margin: 2px; }
+  .bg { background: var(--green-pale); color: var(--green-dark); }
+  .bb { background: var(--blue-pale); color: var(--blue-dark); }
+  .ba { background: var(--amber-pale); color: var(--amber-dark); }
+  .br { background: var(--red-pale); color: var(--red-dark); }
+  .detail { display: none; }
+  .detail.active { display: block; }
+  .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-secondary); font-family: inherit; margin-bottom: 12px; padding: 4px 0; }
+  .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 0.5px solid var(--border); }
+  .detail-emoji { font-size: 46px; }
+  .detail-name { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+  .detail-latin { font-size: 12px; color: var(--text-tertiary); font-style: italic; }
+  .season-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .season-tab { padding: 6px 12px; border-radius: 20px; border: 0.5px solid var(--border-mid); font-size: 12px; cursor: pointer; background: var(--surface); color: var(--text-secondary); font-family: inherit; }
+  .season-tab.active { background: var(--green-pale); color: var(--green-dark); border-color: var(--green-light); font-weight: 600; }
+  .info-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 0.5px solid var(--border); gap: 10px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { font-size: 13px; color: var(--text-secondary); flex-shrink: 0; }
+  .info-val { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: left; }
+  .tip-row { display: flex; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
+  .tip-row:last-child { border-bottom: none; }
+  .tip-ico { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .tip-txt { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+  .tip-txt b { font-weight: 600; color: var(--text-primary); }
+  .alert { border-radius: 12px; padding: 11px 14px; margin-bottom: 12px; }
+  .alert p { font-size: 13px; line-height: 1.5; }
+  .alert-amber { background: var(--amber-pale); color: var(--amber-dark); }
+  .alert-green { background: var(--green-pale); color: var(--green-dark); }
+  .alert-red { background: var(--red-pale); color: var(--red-dark); }
+  .date-label { font-size: 13px; color: var(--text-tertiary); margin-bottom: 10px; }
+  .digest-hero { background: var(--green-mid); border-radius: 14px; padding: 14px; margin-bottom: 12px; color: white; }
+  .digest-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+  .digest-sub { font-size: 12px; opacity: 0.85; }
+  .progress-bar { height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .progress-fill { height: 100%; background: white; border-radius: 2px; transition: width 0.3s; }
+  .task-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
+  .task-item:last-child { border-bottom: none; }
+  .task-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border-mid); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .task-check.done { background: var(--green-bright); border-color: var(--green-bright); }
+  .task-check.done::after { content: '✓'; color: white; font-size: 12px; font-weight: 700; }
+  .task-body { flex: 1; }
+  .task-title { font-size: 14px; color: var(--text-primary); line-height: 1.4; }
+  .task-title.done { text-decoration: line-through; color: var(--text-tertiary); }
+  .task-detail { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; line-height: 1.4; }
+  .task-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 5px; }
+  .tag-today { background: var(--red-pale); color: var(--red-dark); }
+  .tag-soon { background: var(--amber-pale); color: var(--amber-dark); }
+  .copy-area { background: var(--surface); border-radius: 10px; padding: 12px; margin-top: 10px; }
+  .copy-text { font-size: 12px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; }
+  .copy-btn { margin-top: 10px; display: inline-block; padding: 7px 16px; background: var(--card); border: 0.5px solid var(--border-mid); border-radius: 10px; font-size: 13px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .location-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--green-pale); color: var(--green-dark); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+  .install-banner { background: var(--blue-pale); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+  .install-banner-text { flex: 1; font-size: 13px; color: var(--blue-dark); line-height: 1.4; }
+  .install-banner-btn { background: var(--blue-dark); color: white; border: none; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .notif-card { border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 0.5px solid var(--border); background: var(--card); }
+  .notif-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .notif-row:last-child { margin-bottom: 0; }
+  .notif-label { font-size: 13px; color: var(--text-secondary); }
+  .notif-toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .notif-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .notif-slider { position: absolute; inset: 0; background: var(--surface); border-radius: 13px; cursor: pointer; transition: background 0.2s; border: 0.5px solid var(--border-mid); }
+  .notif-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 2px; top: 2px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .notif-toggle input:checked + .notif-slider { background: var(--green-mid); border-color: var(--green-mid); }
+  .notif-toggle input:checked + .notif-slider::before { transform: translateX(18px); }
+  .time-picker { font-size: 15px; font-weight: 600; color: var(--text-primary); background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 8px; padding: 5px 10px; font-family: inherit; cursor: pointer; }
+  .notif-status { font-size: 12px; padding: 8px 12px; border-radius: 10px; margin-top: 10px; line-height: 1.5; }
+  .notif-status.ok { background: var(--green-pale); color: var(--green-dark); }
+  .notif-status.warn { background: var(--amber-pale); color: var(--amber-dark); }
+  .notif-status.err { background: var(--red-pale); color: var(--red-dark); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>🌿 גינת עשבי התיבול שלי</h1>
+    <div class="header-sub">📍 מושב עמינדב · 842 מ' · הרי יהודה</div>
+  </div>
+
+  <div class="screens">
+    <!-- HERBS -->
+    <div class="screen active" id="s-herbs">
+      <div id="herb-list-view">
+        <div id="alert-home"></div>
+        <div class="herb-grid">
+          <button class="herb-btn" onclick="openHerb('mint')">
+            <span class="herb-emoji">🌱</span>
+            <div class="herb-name">נענע</div><div class="herb-latin">Mentha</div>
+            <span class="badge bb">חצי שמש</span><br><span class="badge bg">השקיה רבה</span>
+          </button>
+          <button class="herb-btn" onclick="openHerb('lemon')">
+            <span class="herb-emoji">🍋</span>
+            <div class="herb-name">לימונית</div><div class="herb-latin">Melissa</div>
+            <span class="badge ba">שמש מלאה</span><br><span class="badge bg">השקיה מתונה</span>
+          </button>
+          <button class="herb-btn" onclick="openHerb('basil')">
+            <span class="herb-emoji">🌿</span>
+            <div class="herb-name">בזיליקום</div><div class="herb-latin">Ocimum</div>
+            <span class="badge ba">שמש מלאה</span><br><span class="badge br">מים מועטים</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="detail-mint" class="detail">
+        <button class="back-btn" onclick="closeHerb()">← חזרה</button>
+        <div class="detail-header"><span class="detail-emoji">🌱</span><div><div class="detail-name">נענע</div><div class="detail-latin">Mentha spicata</div></div></div>
+        <div class="season-tabs">
+          <button class="season-tab active" onclick="showSeason('mint','spring',this)">🌸 אביב</button>
+          <button class="season-tab" onclick="showSeason('mint','summer',this)">☀️ קיץ</button>
+          <button class="season-tab" onclick="showSeason('mint','winter',this)">❄️ חורף</button>
+        </div>
+        <div class="card" id="mint-season"></div>
+        <div class="card">
+          <div class="card-label">ייחודי לעמינדב</div>
+          <div class="tip-row"><span class="tip-ico">🌬️</span><div class="tip-txt"><b>רוחות חזקות בחורף ואביב</b> — מייבשות את האדמה מהר. שקול מקום מוגן מרוח.</div></div>
+          <div class="tip-row"><span class="tip-ico">❄️</span><div class="tip-txt"><b>כפור בחורף!</b> הנענע שורדת, אך בלילות מתחת ל-2°C הכנס פנימה.</div></div>
+          <div class="tip-row"><span class="tip-ico">☀️</span><div class="tip-txt"><b>קיץ נעים יחסית</b> — בגובה 842 מ' הטמפ' נמוכה מהחוף ב-5–7°C.</div></div>
+          <div class="tip-row"><span class="tip-ico">💧</span><div class="tip-txt"><b>אוויר יבש</b> — הרי יהודה יבשים. צפה לייבוש מהיר יותר של האדמה.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">טיפים כלליים</div>
+          <div class="tip-row"><span class="tip-ico">🪣</span><div class="tip-txt"><b>עציץ נפרד בלבד.</b> שורשי הנענע פולשניים ומשתלטים על שכנות.</div></div>
+          <div class="tip-row"><span class="tip-ico">✂️</span><div class="tip-txt"><b>גזוז כל שבועיים.</b> מונע פריחה ומעודד עלים חדשים.</div></div>
+          <div class="tip-row"><span class="tip-ico">🌸</span><div class="tip-txt"><b>ניצני פרח? קטם מיד.</b> לאחר פריחה הטעם נחלש משמעותית.</div></div>
+        </div>
+      </div>
+
+      <div id="detail-lemon" class="detail">
+        <button class="back-btn" onclick="closeHerb()">← חזרה</button>
+        <div class="detail-header"><span class="detail-emoji">🍋</span><div><div class="detail-name">לימונית</div><div class="detail-latin">Melissa officinalis</div></div></div>
+        <div class="season-tabs">
+          <button class="season-tab active" onclick="showSeason('lemon','spring',this)">🌸 אביב</button>
+          <button class="season-tab" onclick="showSeason('lemon','summer',this)">☀️ קיץ</button>
+          <button class="season-tab" onclick="showSeason('lemon','winter',this)">❄️ חורף</button>
+        </div>
+        <div class="card" id="lemon-season"></div>
+        <div class="card">
+          <div class="card-label">ייחודי לעמינדב</div>
+          <div class="tip-row"><span class="tip-ico">🌬️</span><div class="tip-txt"><b>רוחות אביב</b> — גבעולים גבוהים עלולים להישבר. תמוך במקל קטן.</div></div>
+          <div class="tip-row"><span class="tip-ico">❄️</span><div class="tip-txt"><b>הכי עמידה לקור מבין השלושה.</b> שורדת שלג קל בלי בעיה.</div></div>
+          <div class="tip-row"><span class="tip-ico">🍂</span><div class="tip-txt"><b>הריח הכי טוב בסתיו!</b> שיא הארומה בספטמבר–אוקטובר.</div></div>
+          <div class="tip-row"><span class="tip-ico">🌧️</span><div class="tip-txt"><b>גשם חורף עז</b> — 500–600 מ"מ בשנה. בחורף אולי לא תצטרך להשקות כלל.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">טיפים כלליים</div>
+          <div class="tip-row"><span class="tip-ico">☀️</span><div class="tip-txt"><b>שמש = ריח.</b> ככל שיותר שמש — ריח לימון חזק יותר.</div></div>
+          <div class="tip-row"><span class="tip-ico">✂️</span><div class="tip-txt"><b>גזוז גבעולים שלמים.</b> מעודד סיעוף ועלים חדשים.</div></div>
+          <div class="tip-row"><span class="tip-ico">🫖</span><div class="tip-txt"><b>לתה:</b> גבעול טרי, 5–7 דקות במים רותחים.</div></div>
+        </div>
+      </div>
+
+      <div id="detail-basil" class="detail">
+        <button class="back-btn" onclick="closeHerb()">← חזרה</button>
+        <div class="detail-header"><span class="detail-emoji">🌿</span><div><div class="detail-name">בזיליקום</div><div class="detail-latin">Ocimum basilicum</div></div></div>
+        <div class="season-tabs">
+          <button class="season-tab active" onclick="showSeason('basil','spring',this)">🌸 אביב</button>
+          <button class="season-tab" onclick="showSeason('basil','summer',this)">☀️ קיץ</button>
+          <button class="season-tab" onclick="showSeason('basil','winter',this)">❄️ חורף</button>
+        </div>
+        <div class="card" id="basil-season"></div>
+        <div class="card">
+          <div class="card-label">ייחודי לעמינדב</div>
+          <div class="tip-row"><span class="tip-ico">⚠️</span><div class="tip-txt"><b>בזיליקום מסוכן בחורף עמינדב.</b> מתחת ל-10°C — מת. חובה להכניס פנימה בלילות אוקטובר–אפריל.</div></div>
+          <div class="tip-row"><span class="tip-ico">☀️</span><div class="tip-txt"><b>קיץ מצוין!</b> 25–30°C בגובה — אידיאלי לבזיליקום.</div></div>
+          <div class="tip-row"><span class="tip-ico">🌬️</span><div class="tip-txt"><b>הגן מרוחות!</b> בזיליקום רגיש. עציץ ליד קיר — תוצאות הרבה יותר טובות.</div></div>
+          <div class="tip-row"><span class="tip-ico">🗓️</span><div class="tip-txt"><b>עונת גידול:</b> אפריל–אוקטובר בלבד בעמינדב.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">טיפים כלליים</div>
+          <div class="tip-row"><span class="tip-ico">🌡️</span><div class="tip-txt"><b>מים בטמפ' חדר בלבד.</b> מים קרים = נזק לשורשים.</div></div>
+          <div class="tip-row"><span class="tip-ico">💧</span><div class="tip-txt"><b>אל תרטיב עלים!</b> השקה ישירות לאדמה בלבד.</div></div>
+          <div class="tip-row"><span class="tip-ico">🌸</span><div class="tip-txt"><b>קטם פרחים מיד.</b> מאריך את חיי הצמח בחודשים.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODAY -->
+    <div class="screen" id="s-today">
+      <div class="date-label" id="date-label"></div>
+      <div id="alert-today"></div>
+      <div class="digest-hero">
+        <div class="digest-title" id="digest-title">🌅 סיכום בוקר</div>
+        <div class="digest-sub" id="digest-sub"></div>
+        <div class="progress-bar"><div class="progress-fill" id="task-prog" style="width:0%"></div></div>
+      </div>
+      <div class="card"><div class="card-label">משימות להיום</div><div id="tasks-today"></div></div>
+      <div class="card"><div class="card-label">בקרוב</div><div id="tasks-soon"></div></div>
+      <div class="card">
+        <div class="card-label">שלח לוואטסאפ / מייל</div>
+        <div class="copy-area"><div class="copy-text" id="copy-text"></div></div>
+        <button class="copy-btn" onclick="copyText()">📋 העתק טקסט</button>
+      </div>
+    </div>
+
+    <!-- START -->
+    <div class="screen" id="s-start">
+      <div id="alert-start"></div>
+
+      <div id="install-banner" class="install-banner" style="display:none;">
+        <div class="install-banner-text">📲 <b>הוסף לדף הבית</b> לגישה מהירה כמו אפליקציה</div>
+        <button class="install-banner-btn" onclick="installPWA()">התקן</button>
+      </div>
+
+      <div class="location-chip">📍 מושב עמינדב · 842 מ' · הרי יהודה</div>
+
+      <div class="notif-card">
+        <div class="card-label">🔔 תזכורת בוקר יומית</div>
+        <div class="notif-row">
+          <span class="notif-label">שלח תזכורת כל יום</span>
+          <label class="notif-toggle">
+            <input type="checkbox" id="notif-toggle" onchange="toggleNotifications(this.checked)">
+            <span class="notif-slider"></span>
+          </label>
+        </div>
+        <div class="notif-row" id="time-row" style="display:none;">
+          <span class="notif-label">שעת התזכורת</span>
+          <input type="time" id="notif-time" class="time-picker" value="08:00" onchange="updateNotifTime(this.value)">
+        </div>
+        <div class="notif-status warn" id="notif-status">הפעל כדי לקבל תזכורת יומית על השקיה וטיפול בגינה.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">מה לקנות</div>
+        <div class="tip-row"><span class="tip-ico">🌱</span><div class="tip-txt"><b>3 שתילים מוכנים</b> — נענע, לימונית, בזיליקום. קנה בגן ירק/מרכז גינון.</div></div>
+        <div class="tip-row"><span class="tip-ico">🪴</span><div class="tip-txt"><b>3 עציצים</b> — לפחות 20 ס"מ קוטר ועומק. פלסטיק עם חורי ניקוז בתחתית.</div></div>
+        <div class="tip-row"><span class="tip-ico">🌍</span><div class="tip-txt"><b>אדמה לעציצים</b> — "אדמה אוניברסלית לעציצים" על השק. לא אדמת גינה.</div></div>
+        <div class="tip-row"><span class="tip-ico">🍽️</span><div class="tip-txt"><b>3 צלחות לעציצים</b> — לנקז מים. רוקן 30 דקות אחרי השקיה.</div></div>
+        <div class="tip-row"><span class="tip-ico">🚿</span><div class="tip-txt"><b>קנקן השקיה</b> — 1–2 ליטר עם זרבובית דקה.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">שמש בעמינדב</div>
+        <div class="tip-row"><span class="tip-ico">☀️</span><div class="tip-txt"><b>שמש מלאה = 6+ שעות שמש ישירה.</b> בעמינדב יש שמש בשפע.</div></div>
+        <div class="tip-row"><span class="tip-ico">🧭</span><div class="tip-txt"><b>מרפסת דרומית/מערבית</b> — אידיאלית. מזרחית — טובה לנענע ולימונית. צפונית — בעיה לבזיליקום.</div></div>
+        <div class="tip-row"><span class="tip-ico">🌬️</span><div class="tip-txt"><b>שים לב לרוחות!</b> מקום מוגן ושמשי עדיף על חשוף ושמשי.</div></div>
+        <div class="tip-row"><span class="tip-ico">💡</span><div class="tip-txt"><b>איך לבדוק:</b> עמוד ב-10:00, 13:00 ו-16:00 — אם בכל שלושת הזמנים יש שמש ישירה, המקום מושלם.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">שלבי נטיעה</div>
+        <div class="tip-row"><span class="tip-ico">1️⃣</span><div class="tip-txt"><b>מלא עציץ באדמה</b> עד 3 ס"מ מהשפה. אל תדחוס.</div></div>
+        <div class="tip-row"><span class="tip-ico">2️⃣</span><div class="tip-txt"><b>עשה חור באמצע</b> באצבעות, כגובה גוש השורשים.</div></div>
+        <div class="tip-row"><span class="tip-ico">3️⃣</span><div class="tip-txt"><b>שחרר שתיל בעדינות,</b> הכנס לחור, כסה באדמה.</div></div>
+        <div class="tip-row"><span class="tip-ico">4️⃣</span><div class="tip-txt"><b>השקיה ראשונה</b> עד שמים יוצאים מחורי התחתית.</div></div>
+        <div class="tip-row"><span class="tip-ico">⚠️</span><div class="tip-txt"><b>נענע — עציץ נפרד תמיד!</b> שורשיה פולשים ומשתלטים.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTab('herbs',this)"><span class="nav-icon">🌿</span>עשבים</button>
+    <button class="nav-btn" onclick="goTab('today',this)"><span class="nav-icon">☀️</span>היום</button>
+    <button class="nav-btn" onclick="goTab('start',this)"><span class="nav-icon">📋</span>התחלה</button>
+  </nav>
+</div>
+
+<script>
+const hebrewDays=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const hebrewMonths=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const now=new Date(), mo=now.getMonth();
+const dayOfYear=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+const dateStr=`יום ${hebrewDays[now.getDay()]}, ${now.getDate()} ב${hebrewMonths[mo]} ${now.getFullYear()}`;
+function getSeason(){return (mo>=2&&mo<=4)?'spring':(mo>=5&&mo<=9)?'summer':'winter';}
+const season=getSeason();
+
+const seasonRows={
+  mint:{
+    spring:[['כמות השקיה','300–400 מ"ל (כוס וחצי)'],['תדירות','כל 2–3 ימים — אביב יבש'],['בדיקה','אצבע 2 ס"מ — אם יבשה, השקה'],['שמש','4–6 שעות'],['סיכון','רוחות חזקות — בדוק לחות תכופות']],
+    summer:[['כמות השקיה','300–400 מ"ל (כוס וחצי)'],['תדירות','כל יום–יומיים'],['בדיקה','בדוק כל בוקר ביולי-אוגוסט'],['שמש','4–6 שעות — חצי צל בצהריים טוב'],['יתרון','קיץ נעים הרבה יותר מהחוף']],
+    winter:[['כמות השקיה','200–300 מ"ל (כוס גדולה)'],['תדירות','כל 4–7 ימים'],['גשם','אם ירד גשם — ספור כהשקיה, אל תוסיף'],['כפור','מתחת ל-2°C — הכנס פנימה'],['שלג','שורדת שלג קל, כפור ממושך עלול להזיק']],
+  },
+  lemon:{
+    spring:[['כמות השקיה','200–300 מ"ל (כוס גדולה)'],['תדירות','כל 2–3 ימים — רוחות מייבשות מהר'],['בדיקה','אצבע 2 ס"מ — אם יבשה, השקה'],['שמש','6+ שעות — שיא הצמיחה'],['הזדמנות','עכשיו זמן מצוין לגיזום חזק']],
+    summer:[['כמות השקיה','200–300 מ"ל (כוס גדולה)'],['תדירות','כל יומיים'],['בדיקה','בדוק כל יום ביולי-אוגוסט'],['שמש','6+ שעות'],['קציר','ספטמבר–אוקטובר — ריח בשיא']],
+    winter:[['כמות השקיה','150–200 מ"ל'],['תדירות','כל 5–7 ימים'],['גשם','גשם חורף מספיק — בדוק לפני כל השקיה'],['קור','עמידה לקור — לא צריך להכניס פנימה'],['שלג','כסה בבד לא-ארוג בשלג כבד']],
+  },
+  basil:{
+    spring:[['כמות השקיה','150–200 מ"ל (כוס קטנה)'],['תדירות','כל 3–4 ימים'],['בדיקה','השקה רק כשאדמה יבשה לגמרי'],['שמש','6+ שעות — חובה'],['אזהרה','לילות עדיין קרים! הכנס מתחת ל-10°C']],
+    summer:[['כמות השקיה','150–200 מ"ל (כוס קטנה)'],['תדירות','כל 2–3 ימים'],['בדיקה','בדוק כל 2 ימים — לא להשקות יתר'],['שמש','6+ שעות — שיא הצמיחה'],['יתרון','קיץ נעים בגובה = בזיליקום מאושר!']],
+    winter:[['מה לעשות','הכנס פנימה! לא שורד חורף עמינדב'],['סף סכנה','מתחת ל-10°C — נזק. מתחת ל-5°C — מת'],['אלטרנטיבה','חלון פנימי שמשי — יצמח לאט אבל ישרוד'],['חזרה החוצה','רק מאפריל — אחרי שעבר הקרה'],['עונת גידול','אפריל–אוקטובר בלבד בעמינדב']],
+  }
+};
+
+function showSeason(herb,s,el){
+  document.getElementById('detail-'+herb).querySelectorAll('.season-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const label=s==='spring'?'אביב':s==='summer'?'קיץ':'חורף';
+  document.getElementById(herb+'-season').innerHTML=
+    `<div class="card-label">השקיה וטיפול — ${label}</div>`+
+    seasonRows[herb][s].map(r=>`<div class="info-row"><span class="info-key">${r[0]}</span><span class="info-val">${r[1]}</span></div>`).join('');
+}
+
+function getAlert(){
+  if(season==='winter') return `<div class="alert alert-red"><p>❄️ <b>חורף בעמינדב:</b> לילות קרים וכפור אפשרי. הכנס בזיליקום פנימה בלילה.</p></div>`;
+  if(season==='spring') return `<div class="alert alert-amber"><p>🌬️ <b>אביב בעמינדב:</b> רוחות חזקות מייבשות אדמה מהר. לילות עדיין קרים — הגן על בזיליקום.</p></div>`;
+  return `<div class="alert alert-green"><p>☀️ <b>קיץ בעמינדב:</b> עונת הגידול האידיאלית! הגובה מרכך את החום.</p></div>`;
+}
+
+let allTasks=[],doneTasks=new Set();
+function buildTasks(){
+  const t=[];
+  if(season==='winter'||dayOfYear%5===0) t.push({id:'bi',title:'בדוק טמפ׳ לילה — בזיליקום',detail:'אם צפויה מתחת ל-10°C הכנס פנימה לפני השקיעה.',herb:'בזיליקום 🌿',u:'today'});
+  if(season!=='winter') t.push({id:'wm',title:'השקיית הנענע',detail:`${season==='summer'?'300–400':'250–350'} מ"ל לאדמה, בבוקר.`,herb:'נענע 🌱',u:'today'});
+  t.push({id:'cl',title:'בדיקת לחות — לימונית',detail:`אצבע 2 ס"מ. אם יבשה — ${season==='winter'?'150–200':'200–300'} מ"ל.${season==='winter'?' אם ירד גשם — דלג.':''}`,herb:'לימונית 🍋',u:'today'});
+  if(season!=='winter') t.push({id:'cb',title:'בדיקת יובש — בזיליקום',detail:'השקה רק כשאדמה יבשה לגמרי. 150–200 מ"ל מים בטמפ׳ חדר.',herb:'בזיליקום 🌿',u:'today'});
+  t.push({id:'wc',title:'בדיקת יציבות עציצים',detail:'רוחות עמינדב — ודא שעציצים לא הפילה הרוח.',herb:'כל העשבים',u:'soon'});
+  if(dayOfYear%14<2) t.push({id:'pr',title:'גיזום נענע ולימונית',detail:'קצץ עד ⅓. מונע פריחה ומעודד עלים טריים.',herb:'נענע 🌱 · לימונית 🍋',u:'soon'});
+  if(dayOfYear%30<3) t.push({id:'fe',title:'דשן חודשי לכל העציצים',detail:'¼ כפית דשן נוזלי ב-1 ליטר מים.',herb:'כל העשבים',u:'soon'});
+  return t;
+}
+
+function renderTasks(){
+  allTasks=buildTasks();
+  const tl=allTasks.filter(t=>t.u==='today'),sl=allTasks.filter(t=>t.u==='soon');
+  const mk=t=>`<div class="task-item"><div class="task-check ${doneTasks.has(t.id)?'done':''}" onclick="toggle('${t.id}')"></div><div class="task-body"><div class="task-title ${doneTasks.has(t.id)?'done':''}">${t.title}</div><div class="task-detail">${t.detail}</div><span class="task-tag ${t.u==='today'?'tag-today':'tag-soon'}">${t.herb}</span></div></div>`;
+  document.getElementById('tasks-today').innerHTML=tl.map(mk).join('');
+  document.getElementById('tasks-soon').innerHTML=sl.map(mk).join('');
+  const done=tl.filter(t=>doneTasks.has(t.id)).length;
+  const pct=tl.length>0?Math.round((done/tl.length)*100):0;
+  document.getElementById('task-prog').style.width=pct+'%';
+  document.getElementById('digest-title').textContent=pct===100?'✅ כל המשימות הושלמו!':'🌅 סיכום בוקר — עמינדב';
+  document.getElementById('digest-sub').textContent=pct===100?'הגינה מטופלת! כל הכבוד.':`${done} מתוך ${tl.length} משימות · ${dateStr}`;
+  let txt=`🌿 גינת עשבי תיבול — מושב עמינדב\n${dateStr}\n\n`;
+  tl.forEach((t,i)=>{txt+=`${i+1}. ${t.title}\n   ${t.detail}\n`;});
+  txt+=`\n📍 עמינדב, 842 מ' · הרי יהודה`;
+  document.getElementById('copy-text').textContent=txt;
+}
+
+function toggle(id){doneTasks.has(id)?doneTasks.delete(id):doneTasks.add(id);renderTasks();}
+function copyText(){
+  const txt=document.getElementById('copy-text').textContent;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>{
+    const b=document.querySelector('.copy-btn');b.textContent='✅ הועתק!';setTimeout(()=>b.textContent='📋 העתק טקסט',2000);
+  });
+}
+
+function openHerb(key){
+  document.getElementById('herb-list-view').style.display='none';
+  document.querySelectorAll('.detail').forEach(d=>d.classList.remove('active'));
+  document.getElementById('detail-'+key).classList.add('active');
+  const tab=document.querySelector(`#detail-${key} .season-tab`);
+  showSeason(key,season,tab);
+  tab.textContent=season==='spring'?'🌸 אביב (עכשיו)':season==='summer'?'☀️ קיץ (עכשיו)':'❄️ חורף (עכשיו)';
+}
+function closeHerb(){
+  document.getElementById('herb-list-view').style.display='block';
+  document.querySelectorAll('.detail').forEach(d=>d.classList.remove('active'));
+}
+function goTab(tab,el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+tab).classList.add('active');
+  el.classList.add('active');
+  if(tab==='today'){document.getElementById('date-label').textContent=dateStr;document.getElementById('alert-today').innerHTML=getAlert();renderTasks();}
+  if(tab==='start') document.getElementById('alert-start').innerHTML=getAlert();
+  if(tab==='herbs') document.getElementById('alert-home').innerHTML=getAlert();
+}
+document.getElementById('alert-home').innerHTML=getAlert();
+
+// Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+
+// Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+function installPWA(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{document.getElementById('install-banner').style.display='none';deferredPrompt=null;});}
+}
+
+// Notifications
+const NOTIF_KEY='herb_notif_enabled', TIME_KEY='herb_notif_time';
+let notifTimer=null;
+
+function buildNotifBody(){
+  const m=new Date().getMonth(),doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000);
+  const s=(m>=2&&m<=4)?'spring':(m>=5&&m<=9)?'summer':'winter';
+  const tasks=[];
+  if(s==='winter'||doy%5===0) tasks.push('בדוק טמפ׳ לילה לבזיליקום 🌿');
+  if(s!=='winter') tasks.push('השקיית הנענע 🌱');
+  tasks.push('בדיקת לחות — לימונית 🍋');
+  if(s!=='winter') tasks.push('בדיקת יובש — בזיליקום 🌿');
+  return tasks.slice(0,3).join(' · ');
+}
+function msUntilTime(hhmm){
+  const [h,m]=hhmm.split(':').map(Number);
+  const n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),h,m,0,0);
+  if(t<=n) t.setDate(t.getDate()+1);
+  return t-n;
+}
+function scheduleDaily(hhmm){
+  if(notifTimer) clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>{fireNotification();scheduleDaily(hhmm);},msUntilTime(hhmm));
+}
+function fireNotification(){
+  if(Notification.permission!=='granted') return;
+  try{new Notification('🌿 גינת עשבי התיבול — עמינדב',{body:buildNotifBody()||'בדוק את הגינה שלך היום!',tag:'herb-daily',renotify:true,dir:'rtl',icon:'/icon-192.png',badge:'/icon-192.png'});}catch(e){}
+}
+function setNotifStatus(enabled,time){
+  const el=document.getElementById('notif-status'),tr=document.getElementById('time-row');
+  if(!enabled){el.className='notif-status warn';el.textContent='הפעל כדי לקבל תזכורת יומית על השקיה וטיפול בגינה.';tr.style.display='none';return;}
+  tr.style.display='flex';
+  if(Notification.permission==='granted'){
+    const [h,m]=time.split(':');
+    el.className='notif-status ok';
+    el.textContent=`✅ תזכורת פעילה — כל יום בשעה ${h}:${m}.`;
+  } else if(Notification.permission==='denied'){
+    el.className='notif-status err';
+    el.textContent='❌ ההתראות חסומות. עבור להגדרות → אפליקציות → כרום → התראות והפעל.';
+  } else {
+    el.className='notif-status warn';el.textContent='⏳ ממתין לאישור התראות...';
+  }
+}
+async function toggleNotifications(enabled){
+  const time=document.getElementById('notif-time').value||'08:00';
+  localStorage.setItem(NOTIF_KEY,enabled?'true':'false');
+  if(!enabled){if(notifTimer){clearTimeout(notifTimer);notifTimer=null;}setNotifStatus(false,time);return;}
+  if(!('Notification' in window)){setNotifStatus(true,time);return;}
+  let perm=Notification.permission;
+  if(perm==='default'){setNotifStatus(true,time);perm=await Notification.requestPermission();}
+  if(perm==='granted'){
+    scheduleDaily(time);
+    setTimeout(()=>{try{new Notification('🌿 גינת עשבי התיבול — עמינדב',{body:'התזכורת הופעלה! תקבל עדכון כל יום בשעה '+time,tag:'herb-test',dir:'rtl',icon:'/icon-192.png'});}catch(e){}},2000);
+  }
+  setNotifStatus(true,time);
+}
+function updateNotifTime(val){
+  localStorage.setItem(TIME_KEY,val);
+  if(notifTimer){clearTimeout(notifTimer);notifTimer=null;}
+  if(Notification.permission==='granted') scheduleDaily(val);
+  setNotifStatus(true,val);
+}
+(function initNotif(){
+  const enabled=localStorage.getItem(NOTIF_KEY)==='true';
+  const time=localStorage.getItem(TIME_KEY)||'08:00';
+  document.getElementById('notif-toggle').checked=enabled;
+  document.getElementById('notif-time').value=time;
+  if(enabled&&Notification.permission==='granted') scheduleDaily(time);
+  setNotifStatus(enabled,time);
+})();
+</script>
+</body>
+</html>
